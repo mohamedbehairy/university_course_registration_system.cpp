@@ -1,0 +1,115 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+// University Course Registration System class
+class CourseRegistrationSystem {
+private:
+    struct CourseNode {   // Node structure to represent a course
+
+        string courseCode;
+        string courseName;
+        CourseNode* next;
+
+        CourseNode(const string& code, const string& name)
+        {
+
+            courseCode=code;
+            courseName=name;
+            next=nullptr;
+        }
+    };
+
+    CourseNode* courseStack;
+    CourseNode* undoStack;
+
+    void pushCourse(CourseNode*& ptr, const string& code, const string& name) {
+        CourseNode* newNode = new CourseNode(code, name);
+        newNode->next = ptr; // top
+        ptr = newNode;
+    }
+
+    void popCourse(CourseNode*& ptr) {
+        if (ptr) {  // ptr != null
+            CourseNode* temp = ptr;
+            ptr = ptr->next;
+            delete temp;    //LIFO
+        }
+    }
+
+public:
+    CourseRegistrationSystem()  // constructor
+    {
+        courseStack=nullptr;
+        undoStack=nullptr;
+    }
+
+    void registerCourse(const string& code, const string& name) {
+        pushCourse(courseStack, code, name);
+        cout << "\nCourse " << code << " registered successfully.\n";
+    }
+
+    void undoRegistration() {
+        if (courseStack) {  // courseStack!=null
+            popCourse(courseStack);
+            cout << "Undo: Course unregistered.\n";
+        } else {
+            cout << "Error: No courses to undo.\n";
+        }
+    }
+
+    void displayRegisteredCourses() const {
+        CourseNode* cur = courseStack;
+        cout << "Registered Courses:\n";
+
+        while (cur!=NULL) {
+            cout << "Code: " << cur->courseCode
+                 << "\tName: " << cur->courseName << endl;
+            cur = cur->next;
+        }
+    }
+
+
+};   // end of class
+
+// Function to handle course registration based on user input
+void registerCourse(CourseRegistrationSystem& registrationSystem) {  //object of class
+    string Code, Name;
+    cout << "Please enter the course code: ";
+    cin >> Code;
+    cout << "Please enter the course name: ";
+    cin.ignore(); // Clear the newline character from the buffer
+    getline(cin, Name);
+
+    registrationSystem.registerCourse(Code, Name);
+}
+
+int main() {
+    CourseRegistrationSystem System; // object of class
+
+    while (true) {
+        string action;
+        cout << "\nPlease enter an action (Display, Register, Undo, or Exit): ";
+        cin >> action;
+
+        if (action == "Display") {
+            System.displayRegisteredCourses();
+        }
+        else if (action == "Register") {
+            registerCourse(System);
+        }
+        else if (action == "Undo") {
+            System.undoRegistration();
+        }
+        else if (action == "Exit") {
+            break;
+        }
+        else {
+            cout << "Invalid action. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
